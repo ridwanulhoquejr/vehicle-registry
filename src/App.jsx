@@ -436,19 +436,19 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
           },
           ...(!isSimple
             ? [
-                {
-                  key: "reg_no",
-                  label: "Registration No",
-                  placeholder: "e.g. REG-2026-001",
-                  required: true,
-                },
-                {
-                  key: "licence_no",
-                  label: "Vehicle Licence No",
-                  placeholder: "e.g. DHA-1234",
-                  required: true,
-                },
-              ]
+              {
+                key: "reg_no",
+                label: "Registration No",
+                placeholder: "e.g. REG-2026-001",
+                required: true,
+              },
+              {
+                key: "licence_no",
+                label: "Vehicle Licence No",
+                placeholder: "e.g. DHA-1234",
+                required: true,
+              },
+            ]
             : []),
           {
             key: "address",
@@ -807,18 +807,18 @@ function PublicView({ vehicles, loading }) {
         </div>
       ) : (
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+          className="vehicle-grid"
         >
           {filtered.map((v, i) => {
             const c = VEHICLE_COLORS[v.vehicle_type];
             return (
               <div
                 key={v.id}
+                className="vehicle-card"
                 style={{
                   background: "#fff",
                   border: "1.5px solid #E5E7EB",
                   borderRadius: 16,
-                  padding: "18px 20px",
                   transition: "transform 0.2s, box-shadow 0.2s",
                   animation: `fadeSlide 0.35s ease ${i * 0.04}s both`,
                   cursor: "default",
@@ -860,12 +860,16 @@ function PublicView({ vehicles, loading }) {
                   <Badge type={v.vehicle_type} />
                 </div>
                 <div
+                  className="card-name"
                   style={{
                     fontWeight: 700,
                     fontSize: 16,
                     color: "#1B2A4A",
                     marginBottom: 6,
                     fontFamily: "'Playfair Display', serif",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {v.name}
@@ -880,13 +884,13 @@ function PublicView({ vehicles, loading }) {
                   ]
                     .filter(({ val }) => val)
                     .map(({ label, val }) => (
-                    <div key={label} style={{ fontSize: 12, color: "#667085" }}>
-                      <span style={{ fontWeight: 600, color: "#475467" }}>
-                        {label}:
-                      </span>{" "}
-                      {val}
-                    </div>
-                  ))}
+                      <div key={label} className="card-detail" style={{ fontSize: 12, color: "#667085", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        <span style={{ fontWeight: 600, color: "#475467" }}>
+                          {label}:
+                        </span>{" "}
+                        {val}
+                      </div>
+                    ))}
                 </div>
                 <div
                   style={{ fontSize: 10, color: "#C4C4C4", marginTop: 8 }}
@@ -949,6 +953,17 @@ export default function App() {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #fff; }
         input:focus { border-color: #1E88E5 !important; }
+        .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .vehicle-card { padding: 18px 20px; }
+        @media (max-width: 520px) {
+          .vehicle-grid { gap: 8px; }
+          .vehicle-card { padding: 12px 10px; }
+          .vehicle-card .card-name { font-size: 14px !important; }
+          .vehicle-card .card-detail { font-size: 11px !important; }
+        }
+        @media (max-width: 360px) {
+          .vehicle-grid { grid-template-columns: 1fr; }
+        }
       `}</style>
 
       {/* ─── Navigation ─── */}
@@ -993,17 +1008,7 @@ export default function App() {
                 lineHeight: 1.2,
               }}
             >
-              Lohagara Oil Distribution
-            </div>
-            <div
-              style={{
-                fontSize: 9,
-                color: "#22C55E",
-                fontWeight: 600,
-                letterSpacing: 0.5,
-              }}
-            >
-              ● CONNECTED TO POSTGRESQL
+              Lohagara UP Oil Distribution
             </div>
           </div>
         </div>
@@ -1086,7 +1091,7 @@ export default function App() {
       )}
 
       {/* ─── Content ─── */}
-      <div style={{ maxWidth: 720, margin: "28px auto", padding: "0 20px" }}>
+      <div style={{ maxWidth: 720, margin: "28px auto", padding: "0 12px" }}>
         {view === "admin" ? (
           adminAuth ? (
             <AdminPanel
@@ -1113,15 +1118,15 @@ export default function App() {
           marginTop: 20,
         }}
       >
-        Lohagara Oil Distribution • Built by{" "}
-          <a
-            href="https://cifarx.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#1E88E5", textDecoration: "none", fontWeight: 600 }}
-          >
-            CifarX
-          </a>
+        Lohagara UP Oil Distribution • Built by{" "}
+        <a
+          href="https://cifarx.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: "#1E88E5", textDecoration: "none", fontWeight: 600 }}
+        >
+          CifarX
+        </a>
       </div>
     </div>
   );
