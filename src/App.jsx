@@ -85,7 +85,7 @@ function Badge({ type }) {
         display: "inline-flex",
         alignItems: "center",
         gap: 5,
-        padding: "4px 12px",
+        padding: "6px 16px",
         borderRadius: 20,
         fontSize: 12,
         fontWeight: 600,
@@ -95,7 +95,7 @@ function Badge({ type }) {
         letterSpacing: 0.3,
       }}
     >
-      {VEHICLE_ICONS[type]} {type}
+      {type}
     </span>
   );
 }
@@ -430,8 +430,9 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
         {[
           {
             key: "name",
-            label: "Owner Name",
+            label: "Name",
             placeholder: "e.g. Rafiq Ahmed",
+            required: true,
           },
           ...(!isSimple
             ? [
@@ -439,11 +440,13 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
                   key: "reg_no",
                   label: "Registration No",
                   placeholder: "e.g. REG-2026-001",
+                  required: true,
                 },
                 {
                   key: "licence_no",
                   label: "Vehicle Licence No",
                   placeholder: "e.g. DHA-1234",
+                  required: true,
                 },
               ]
             : []),
@@ -452,7 +455,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
             label: "Address (Optional)",
             placeholder: "e.g. 45 Station Road, Chattogram",
           },
-        ].map(({ key, label, placeholder }) => (
+        ].map(({ key, label, placeholder, required }) => (
           <div
             key={key}
             style={key === "address" ? { gridColumn: "1 / -1" } : {}}
@@ -468,6 +471,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
               }}
             >
               {label}
+              {required && <span style={{ color: "#E53935", marginLeft: 2 }}>*</span>}
             </label>
             <input
               style={inputStyle(key)}
@@ -511,7 +515,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
             letterSpacing: 0.3,
           }}
         >
-          Vehicle Type
+          Vehicle Type<span style={{ color: "#E53935", marginLeft: 2 }}>*</span>
         </label>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {VEHICLE_TYPES.map((t) => {
@@ -832,22 +836,23 @@ function PublicView({ vehicles, loading }) {
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
+                    alignItems: "center",
+                    gap: 10,
                     marginBottom: 12,
                   }}
                 >
                   <div
                     style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 12,
+                      width: 38,
+                      height: 38,
+                      borderRadius: 10,
                       background: c.bg,
                       border: `1.5px solid ${c.border}`,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontSize: 20,
+                      fontSize: 18,
+                      flexShrink: 0,
                     }}
                   >
                     {VEHICLE_ICONS[v.vehicle_type]}
@@ -1101,11 +1106,11 @@ export default function App() {
       <div
         style={{
           textAlign: "center",
-          padding: "20px",
-          fontSize: 11,
-          color: "#C4C4C4",
+          padding: "16px 20px",
+          fontSize: 13,
+          color: "#9CA3AF",
           borderTop: "1px solid #F3F4F6",
-          marginTop: 40,
+          marginTop: 20,
         }}
       >
         Lohagara Oil Distribution • Built by{" "}
