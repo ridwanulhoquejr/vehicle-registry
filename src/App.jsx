@@ -305,6 +305,8 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
     else if (!/^\d+$/.test(form.card_no.trim())) e.card_no = "Card No must contain only numbers";
     if (!isSimple) {
       if (!form.reg_no.trim()) e.reg_no = "Required";
+    }
+    if (!isSimple || form.vehicle_type === "Unregistered Vehicle") {
       if (!form.licence_no.trim()) e.licence_no = "Required";
     }
     setErrors(e);
@@ -324,7 +326,9 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
         const prefix = form.vehicle_type === "Agriculture" ? "AGR" : form.vehicle_type === "Unregistered Vehicle" ? "URV" : "EMS";
         const uid = Date.now().toString(36).toUpperCase();
         payload.reg_no = `${prefix}-${uid}`;
-        payload.licence_no = `${prefix}-L-${uid}`;
+        if (form.vehicle_type !== "Unregistered Vehicle") {
+          payload.licence_no = `${prefix}-L-${uid}`;
+        }
       }
       await onAdd(payload);
       setForm({ ...EMPTY_FORM });
@@ -475,6 +479,10 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
                 placeholder: "e.g. REG-2026-001",
                 required: true,
               },
+            ]
+            : []),
+          ...(!isSimple || form.vehicle_type === "Unregistered Vehicle"
+            ? [
               {
                 key: "licence_no",
                 label: "Licence No",
