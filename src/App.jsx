@@ -58,7 +58,7 @@ const supabase = {
 };
 
 // ─── Constants ───
-const VEHICLE_TYPES = ["Car", "Bike", "Micro Bus", "Agriculture", "Emergency Services", "Unregistered Vehicle"];
+const VEHICLE_TYPES = ["Car", "Bike", "Micro Bus", "Unregistered Vehicle", "Agriculture", "Emergency Services"];
 const SIMPLE_TYPES = ["Agriculture", "Emergency Services", "Unregistered Vehicle"];
 const VEHICLE_ICONS = { Car: "🚗", Bike: "🏍️", "Micro Bus": "🚐", Agriculture: "🚜", "Emergency Services": "🚑", "Unregistered Vehicle": "🚫" };
 const VEHICLE_COLORS = {
