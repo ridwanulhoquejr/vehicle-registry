@@ -71,6 +71,7 @@ const VEHICLE_COLORS = {
 };
 const EMPTY_FORM = {
   name: "",
+  card_no: "",
   reg_no: "",
   licence_no: "",
   address: "",
@@ -300,6 +301,8 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
   const validate = () => {
     const e = {};
     if (!form.name.trim()) e.name = "Required";
+    if (!form.card_no.trim()) e.card_no = "Required";
+    else if (!/^\d+$/.test(form.card_no.trim())) e.card_no = "Card No must contain only numbers";
     if (!isSimple) {
       if (!form.reg_no.trim()) e.reg_no = "Required";
       if (!form.licence_no.trim()) e.licence_no = "Required";
@@ -318,8 +321,10 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
       payload.type = isAgriOrEms && payload.type?.trim() ? payload.type.trim() : null;
       payload.engine_no = form.vehicle_type === "Unregistered Vehicle" && payload.engine_no?.trim() ? payload.engine_no.trim() : null;
       if (isSimple) {
-        payload.reg_no = "N/A";
-        payload.licence_no = "N/A";
+        const prefix = form.vehicle_type === "Agriculture" ? "AGR" : form.vehicle_type === "Unregistered Vehicle" ? "URV" : "EMS";
+        const uid = Date.now().toString(36).toUpperCase();
+        payload.reg_no = `${prefix}-${uid}`;
+        payload.licence_no = `${prefix}-L-${uid}`;
       }
       await onAdd(payload);
       setForm({ ...EMPTY_FORM });
@@ -438,6 +443,12 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
             placeholder: "e.g. Rafiq Ahmed",
             required: true,
           },
+          {
+            key: "card_no",
+            label: "Card No",
+            placeholder: "e.g. 1234",
+            required: true,
+          },
           ...(["Agriculture", "Emergency Services"].includes(form.vehicle_type)
             ? [
               {
@@ -466,7 +477,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
               },
               {
                 key: "licence_no",
-                label: "Vehicle Licence No",
+                label: "Licence No",
                 placeholder: "e.g. DHA-1234",
                 required: true,
               },
@@ -644,7 +655,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
                       {v.name}
                     </div>
                     <div style={{ fontSize: 11, color: "#98A2B3" }}>
-                      {[v.reg_no, v.licence_no].filter(x => x && x !== "N/A").join(" · ") || v.address || "—"}
+                      {[v.reg_no, v.licence_no].filter(x => x && !/^(AGR|EMS|URV)-/.test(x)).join(" · ") || v.address || "—"}
                     </div>
                   </div>
                 </div>
@@ -690,6 +701,7 @@ function PublicView({ vehicles, loading }) {
       !q ||
       String(v.id).includes(q) ||
       v.name.toLowerCase().includes(q) ||
+      (v.card_no && v.card_no.toLowerCase().includes(q)) ||
       (v.reg_no && v.reg_no.toLowerCase().includes(q)) ||
       (v.licence_no && v.licence_no.toLowerCase().includes(q)) ||
       (v.address && v.address.toLowerCase().includes(q));
@@ -900,14 +912,18 @@ function PublicView({ vehicles, loading }) {
                   style={{ display: "flex", flexDirection: "column", gap: 4 }}
                 >
                   {[
-                    { label: "Serial No", val: v.id },
+                    { label: "Card No", val: v.card_no },
                     { label: "Reg No", val: v.reg_no },
                     { label: "Licence", val: v.licence_no },
                     { label: "Type", val: v.type },
                     { label: "Engine No", val: v.engine_no },
                     { label: "Address", val: v.address },
                   ]
-                    .filter(({ val }) => val && val !== "N/A")
+                    .filter(({ val, label }) => {
+                      if (!val) return false;
+                      if ((label === "Reg No" || label === "Licence") && /^(AGR|EMS|URV)-/.test(val)) return false;
+                      return true;
+                    })
                     .map(({ label, val }) => (
                       <div key={label} className="card-detail" style={{ fontSize: 12, color: "#667085", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <span style={{ fontWeight: 600, color: "#475467" }}>
