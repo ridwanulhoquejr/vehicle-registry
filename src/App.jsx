@@ -58,15 +58,16 @@ const supabase = {
 };
 
 // ─── Constants ───
-const VEHICLE_TYPES = ["Car", "Bike", "Micro Bus", "Agriculture", "Emergency Services"];
-const SIMPLE_TYPES = ["Agriculture", "Emergency Services"];
-const VEHICLE_ICONS = { Car: "🚗", Bike: "🏍️", "Micro Bus": "🚐", Agriculture: "🚜", "Emergency Services": "🚑" };
+const VEHICLE_TYPES = ["Car", "Bike", "Micro Bus", "Agriculture", "Emergency Services", "Unregistered Vehicle"];
+const SIMPLE_TYPES = ["Agriculture", "Emergency Services", "Unregistered Vehicle"];
+const VEHICLE_ICONS = { Car: "🚗", Bike: "🏍️", "Micro Bus": "🚐", Agriculture: "🚜", "Emergency Services": "🚑", "Unregistered Vehicle": "🚫" };
 const VEHICLE_COLORS = {
   Car: { bg: "#E8F5E9", border: "#43A047", text: "#2E7D32" },
   Bike: { bg: "#FFF3E0", border: "#FB8C00", text: "#E65100" },
   "Micro Bus": { bg: "#E3F2FD", border: "#1E88E5", text: "#0D47A1" },
   Agriculture: { bg: "#F1F8E9", border: "#7CB342", text: "#33691E" },
   "Emergency Services": { bg: "#FCE4EC", border: "#E53935", text: "#B71C1C" },
+  "Unregistered Vehicle": { bg: "#F3E5F5", border: "#8E24AA", text: "#4A148C" },
 };
 const EMPTY_FORM = {
   name: "",
@@ -74,6 +75,8 @@ const EMPTY_FORM = {
   licence_no: "",
   address: "",
   vehicle_type: "Car",
+  type: "",
+  engine_no: "",
 };
 
 // ─── Badge ───
@@ -311,11 +314,12 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
     try {
       const payload = { ...form };
       if (!payload.address?.trim()) payload.address = null;
+      const isAgriOrEms = ["Agriculture", "Emergency Services"].includes(form.vehicle_type);
+      payload.type = isAgriOrEms && payload.type?.trim() ? payload.type.trim() : null;
+      payload.engine_no = form.vehicle_type === "Unregistered Vehicle" && payload.engine_no?.trim() ? payload.engine_no.trim() : null;
       if (isSimple) {
-        const prefix = form.vehicle_type === "Agriculture" ? "AGR" : "EMS";
-        const uid = Date.now().toString(36).toUpperCase();
-        payload.reg_no = `${prefix}-${uid}`;
-        payload.licence_no = `${prefix}-L-${uid}`;
+        payload.reg_no = "N/A";
+        payload.licence_no = "N/A";
       }
       await onAdd(payload);
       setForm({ ...EMPTY_FORM });
@@ -434,6 +438,24 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
             placeholder: "e.g. Rafiq Ahmed",
             required: true,
           },
+          ...(["Agriculture", "Emergency Services"].includes(form.vehicle_type)
+            ? [
+              {
+                key: "type",
+                label: "Type (Optional)",
+                placeholder: form.vehicle_type === "Agriculture" ? "e.g. Tractor, Harvester" : "e.g. Ambulance, Fire Truck",
+              },
+            ]
+            : []),
+          ...(form.vehicle_type === "Unregistered Vehicle"
+            ? [
+              {
+                key: "engine_no",
+                label: "Engine No. (Optional)",
+                placeholder: "e.g. ENG-123456",
+              },
+            ]
+            : []),
           ...(!isSimple
             ? [
               {
@@ -517,7 +539,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
         >
           Vehicle Type<span style={{ color: "#E53935", marginLeft: 2 }}>*</span>
         </label>
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
           {VEHICLE_TYPES.map((t) => {
             const active = form.vehicle_type === t;
             const c = VEHICLE_COLORS[t];
@@ -526,7 +548,6 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
                 key={t}
                 onClick={() => setForm((f) => ({ ...f, vehicle_type: t }))}
                 style={{
-                  flex: 1,
                   padding: "12px 8px",
                   borderRadius: 12,
                   border: active
@@ -623,7 +644,7 @@ function AdminPanel({ vehicles, onAdd, onDelete }) {
                       {v.name}
                     </div>
                     <div style={{ fontSize: 11, color: "#98A2B3" }}>
-                      {[v.reg_no, v.licence_no].filter(Boolean).join(" · ") || v.address || "—"}
+                      {[v.reg_no, v.licence_no].filter(x => x && x !== "N/A").join(" · ") || v.address || "—"}
                     </div>
                   </div>
                 </div>
@@ -667,6 +688,7 @@ function PublicView({ vehicles, loading }) {
     const q = search.toLowerCase();
     const matchSearch =
       !q ||
+      String(v.id).includes(q) ||
       v.name.toLowerCase().includes(q) ||
       (v.reg_no && v.reg_no.toLowerCase().includes(q)) ||
       (v.licence_no && v.licence_no.toLowerCase().includes(q)) ||
@@ -733,7 +755,7 @@ function PublicView({ vehicles, loading }) {
           🔍
         </span>
         <input
-          placeholder="Search by name, registration, licence…"
+          placeholder="Search by serial no, name, registration, licence…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{
@@ -878,11 +900,14 @@ function PublicView({ vehicles, loading }) {
                   style={{ display: "flex", flexDirection: "column", gap: 4 }}
                 >
                   {[
+                    { label: "Serial No", val: v.id },
                     { label: "Reg No", val: v.reg_no },
                     { label: "Licence", val: v.licence_no },
+                    { label: "Type", val: v.type },
+                    { label: "Engine No", val: v.engine_no },
                     { label: "Address", val: v.address },
                   ]
-                    .filter(({ val }) => val)
+                    .filter(({ val }) => val && val !== "N/A")
                     .map(({ label, val }) => (
                       <div key={label} className="card-detail" style={{ fontSize: 12, color: "#667085", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                         <span style={{ fontWeight: 600, color: "#475467" }}>
@@ -952,6 +977,7 @@ export default function App() {
         @keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #fff; }
+        input::placeholder { color: #C4C4C4; opacity: 1; }
         input:focus { border-color: #1E88E5 !important; }
         .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
         .vehicle-card { padding: 18px 20px; }
