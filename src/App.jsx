@@ -756,7 +756,6 @@ function PublicView({ vehicles, loading }) {
         </div>
         <div style={{ fontSize: 13, opacity: 0.7, marginTop: 4 }}>
           {vehicles.length} vehicle{vehicles.length !== 1 ? "s" : ""} on record
-          • Powered by PostgreSQL
         </div>
       </div>
 
@@ -1003,16 +1002,18 @@ export default function App() {
         body { background: #fff; }
         input::placeholder { color: #C4C4C4; opacity: 1; }
         input:focus { border-color: #1E88E5 !important; }
-        .vehicle-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-        .vehicle-card { padding: 18px 20px; }
+        .vehicle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+        .vehicle-card { padding: 18px 20px; min-width: 0; }
         @media (max-width: 520px) {
           .vehicle-grid { gap: 8px; }
-          .vehicle-card { padding: 12px 10px; }
-          .vehicle-card .card-name { font-size: 14px !important; }
-          .vehicle-card .card-detail { font-size: 11px !important; }
+          .vehicle-card { padding: 10px 8px; }
+          .vehicle-card .card-name { font-size: 13px !important; }
+          .vehicle-card .card-detail { font-size: 10px !important; }
         }
         @media (max-width: 360px) {
-          .vehicle-grid { grid-template-columns: 1fr; }
+          .vehicle-card { padding: 8px 6px; }
+          .vehicle-card .card-name { font-size: 12px !important; }
+          .vehicle-card .card-detail { font-size: 9px !important; }
         }
       `}</style>
 
